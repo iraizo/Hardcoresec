@@ -1,0 +1,7 @@
+## Interface: 11403
+## Title: HardcoreSecurityResearch
+## Notes: Security research addon for the hardcore addon
+## Author: raizo
+## Version: 1.0
+
+HardcoreSecurityResearch.lua

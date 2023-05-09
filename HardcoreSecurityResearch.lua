@@ -14,6 +14,27 @@ local checksum_relay_pass = "l33tkekw"
 
 local checksum_queue = {}
 
+-- timeouts defined by the hardcore addon to prevent spamming :3
+local COMM_SPAM_THRESHOLD = {
+    -- msgs received within durations (s) are flagged as spam
+    PULSE = 3,
+    ADD = 180,
+    DEAD = 180,
+}
+
+local current_threshhold = 0
+local send_chat_message = true
+
+local function handleTimeout()
+    current_threshhold = current_threshhold - 1
+    if current_threshhold > 0 then
+        C_Timer.After(1, handleTimeout)
+    else -- reset
+        current_threshhold = 180
+        ConsolePrint("Waiting 180s before sending next death log.")
+    end
+end
+
 -- Connect other griefers with the addon to relay their own checksums to channel to broadcast them together
 local function joinRelay()
     JoinChannelByName(checksum_relay, checksum_relay_pass)
@@ -116,6 +137,13 @@ local function generateFakePlayerDataMessage(data)
 end
 
 local function sendDeathLog(msg)
+    if current_threshhold ~= 0 then
+        ConsolePrint("Not sending death log, spam threshold not met, need to wait for: " .. current_threshhold)
+        return
+    end
+    handleTimeout()
+
+
     local _, _, race_id = UnitRace("player")
     local _, _, class_id = UnitClass("player")
     local guildName, _, _ = GetGuildInfo("player");
